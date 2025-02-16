@@ -111,8 +111,9 @@
                 <div v-for="(item,index) in voteItems" :key="index">
                   <el-col :xs="10" :sm="5" :offset="1">
                     <el-card style="background-color: #F7F7F7; margin-bottom: 10px">
+<!--                      客户端投票选项-->
                       <div @click="showDetail(item)">
-                        <img :src="(`item.coverUrl`)" alt="" :onerror="errorImg01"
+                        <img :src="item.coverUrl" alt="" :onerror="errorImg01"
                              style="width: 66px;height: 66px; border-radius: 50%;">
                         <div style="padding: 14px;color: #999; font-size: 14px;">
                           <span style="font-size: 16px;font-weight: bold; color: #2C3E50;">{{ item.title }}</span><br/>
@@ -134,7 +135,8 @@
                   <el-col :xs="10" :sm="5" :offset="1">
                     <el-card style="background-color: #F7F7F7;margin-bottom: 10px">
                       <div @click="showDetail(item)">
-                        <img :src="(`item.coverUrl`)" alt="" :onerror="errorImg01"
+<!--                        管理员端选项-->
+                        <img :src="item.coverUrl" alt="" :onerror="errorImg01"
                              style="width: 66px;height: 66px; border-radius: 50%;">
                         <div style="padding: 14px;color: #999; font-size: 14px;">
                           <span style="font-size: 16px;font-weight: bold; color: #2C3E50;">{{ item.title }}</span><br/>
@@ -183,8 +185,9 @@
                     <el-col :sm="4" :xs="4" style="margin-top: 22px;color: #999;">第{{ index + 1 }}名</el-col>
                     <el-col :sm="4" :xs="4" style="margin-top: 22px;color: #999;">{{ item.title }}</el-col>
                     <el-col :sm="4" :xs="4" :offset="1">
-                      <img :src="(`item.coverUrl`)" alt="" :onerror="errorImg01"
-                                                             style=" width: 55px;height: 55px; border-radius: 50%;margin-top: 5px;">
+<!--                      客户端排行-->
+                      <img :src="item.coverUrl" alt="" :onerror="errorImg01"
+                           style="width: 66px;height: 66px; border-radius: 50%;">
                     </el-col>
                     <el-col :sm="6" :xs="5" style="margin-top: 22px;color: #999;">
                       <el-progress :text-inside="true" :stroke-width="18"

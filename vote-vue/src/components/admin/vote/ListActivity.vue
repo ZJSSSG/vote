@@ -63,7 +63,8 @@
                   <el-button size="mini" type="primary"  @click="editActivity(scope.row)">编辑</el-button>
                   <el-button size="mini" type="primary"  @click="editCandidate(scope.row)">选手管理</el-button>
                   <el-button size="mini" type="success"  @click="toVoteResult(scope.row)">统计</el-button>
-                  <el-button size="mini"  type="warning" @click="showQrCode(scope.row)">二维码</el-button>
+                  <el-button size="mini"  type="warning" @click="showQrCode(scope.row)">分享</el-button>
+                  <el-button size="mini"  type="warning" @click="toVote(scope.row)">投票</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -186,15 +187,24 @@
       },
       editActivity(activity){
         this.$store.commit('createActive', activity)
-        this.$router.replace('/admin/vote/add/index')
+        const id = this.$store.state.curCreateActivity.id;
+        window.open(`/admin/vote/add/index?id=${id}`, '_blank'); // 打开新页面
+
       },
       editCandidate(activity){
         this.$store.commit('createActive', activity)
-        this.$router.replace('/admin/vote/add/item')
+        const id = this.$store.state.curCreateActivity.id;
+        window.open(`/admin/vote/add/item?id=${id}`, '_blank'); // 打开新页面
       },
       toVoteResult(activity){
         this.$store.commit('createActive', activity)
-        this.$router.replace('/admin/vote/list/result')
+        const id = this.$store.state.curCreateActivity.id;
+        window.open(`/admin/vote/list/result?id=${id}`, '_blank');
+        // this.$router.replace('/admin/vote/list/result')
+      },
+      toVote(activity){
+        this.$store.commit('createActive', activity);
+        window.open(`/ActivityIndex/${activity.id}`, '_blank'); // 打开新页面
       },
       showQrCode(activity){
         this.dialogFormVisible = true

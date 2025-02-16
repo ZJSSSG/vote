@@ -75,6 +75,9 @@
       }
     },
     mounted() {
+      if (this.$route.query.id) {
+        this.$store.state.curCreateActivity.id=this.$route.query.id
+      }
       this.getTotal()
     },
     methods:{
