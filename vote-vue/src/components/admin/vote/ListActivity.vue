@@ -16,10 +16,55 @@
     <el-row>
       <el-col :sm="1"  :xl="2">&nbsp;</el-col>
       <el-col :sm="20"  :xs="24">
+        <el-card style="margin-top: 20px">
+          <div style="float: left;margin-bottom: 20px">
+            最新公告
+          </div>
+          <div style="text-align: left;">
+            <el-table
+              v-loading="noticeLoading"
+              :data="notices"
+              stripe
+              :default-sort = "{prop: 'id', order: 'ascending'}"
+              style="width: 100%"
+              ref="multipleTable"
+              show-overflow-tooltip>
+              <el-table-column
+                label="标题"
+                fit>
+                <template slot-scope="scope">
+                  <router-link :to="'/notice/detail/'+scope.row.id" class="notice-link">{{scope.row.title}}</router-link>
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="发布时间"
+                fit>
+                <template slot-scope="scope">
+                  <div style="color: #999;">{{scope.row.createTime | fmtDate}}</div>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div style="float: left;padding: 15px">
+              <el-pagination
+                @current-change="handleNoticeCurrentChange"
+                :current-page="noticeCurrentPage"
+                :page-size="noticePageSize"
+                :total="noticeTotalSize">
+              </el-pagination>
+            </div>
+          </div>
+        </el-card>
+
+      </el-col>
+
+    </el-row>
+    <el-row>
+      <el-col :sm="1"  :xl="2">&nbsp;</el-col>
+      <el-col :sm="20"  :xs="24">
         <el-card>
           <div>
             <div style="float: left">
-              最近的投票
+              我创建的投票
             </div>
             <div style="float: right">
               <el-button type="primary" @click="toCreate">创建投票</el-button>
@@ -85,48 +130,68 @@
     <el-row>
       <el-col :sm="1"  :xl="2">&nbsp;</el-col>
       <el-col :sm="20"  :xs="24">
-        <el-card style="margin-top: 20px">
-          <div style="float: left;margin-bottom: 20px">
-            最新公告
+        <el-card>
+          <div>
+            <div style="float: left">
+              我参与的投票
+            </div>
           </div>
-          <div style="text-align: left;">
+          <div style="text-align: left">
             <el-table
-              v-loading="noticeLoading"
-              :data="notices"
+              v-loading="loading"
+              :data="canVoteActivities"
               stripe
               :default-sort = "{prop: 'id', order: 'ascending'}"
               style="width: 100%"
-              ref="multipleTable"
-              show-overflow-tooltip>
+              ref="multipleTable">
               <el-table-column
+                prop="title"
                 label="标题"
+                width="200">
+              </el-table-column>
+              <el-table-column
+                label="状态"
                 fit>
                 <template slot-scope="scope">
-                  <router-link :to="'/notice/detail/'+scope.row.id" class="notice-link">{{scope.row.title}}</router-link>
+                  <el-tag type="info"  size="small" v-if="date.getTime() < Date.parse(scope.row.startTime)">未开始</el-tag>
+                  <el-tag type="danger"  size="small" v-else-if="new Date().getTime() > Date.parse(scope.row.endTime)">已结束</el-tag>
+                  <el-tag type="success" size="small" v-else>进行中</el-tag>
                 </template>
               </el-table-column>
               <el-table-column
-                label="发布时间"
-                fit>
+                label="活动时间"
+                width="200">
                 <template slot-scope="scope">
-                  <div style="color: #999;">{{scope.row.createTime | fmtDate}}</div>
+                  <div style="color: #999;">{{scope.row.startTime | fmtDate}}</div>
+                  <div style="color: #999;">{{scope.row.endTime | fmtDate}}</div>
+                  <div style="color: #999;"></div>
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="操作"
+                width="500px">
+                <template slot-scope="scope">
+                  <el-button size="mini" type="success"  @click="toVoteResult(scope.row)">统计</el-button>
+                  <el-button size="mini"  type="warning" @click="showQrCode(scope.row)">分享</el-button>
+                  <el-button size="mini"  type="warning" @click="toVote(scope.row)">投票</el-button>
                 </template>
               </el-table-column>
             </el-table>
             <div style="float: left;padding: 15px">
               <el-pagination
-                @current-change="handleNoticeCurrentChange"
-                :current-page="noticeCurrentPage"
-                :page-size="noticePageSize"
-                :total="noticeTotalSize">
+                @current-change="handleCurrentChange"
+                :current-page="currentPage"
+                :page-size="pageSize"
+                :total="canVotetotalSize">
               </el-pagination>
-            </div>
-            </div>
+          </div>
+          </div>
         </el-card>
 
       </el-col>
 
     </el-row>
+
   </div>
 </template>
 
@@ -142,11 +207,13 @@
         currentPage:1,
         pageSize:6,
         totalSize:0,
+        canVotetotalSize:0,
         noticeCurrentPage:1,
         noticePageSize:4,
         noticeTotalSize:0,
         notices:[],
         activities:[],
+        canVoteActivities:[],
         voteItems:[],
         date: new Date(),
         date_1:'',
@@ -163,6 +230,7 @@
         })()
       }
       this.listActivity()
+      this.canVoteListActivity()
       this.listNotice()
 
     },
@@ -177,6 +245,20 @@
             if(resp && resp.data.code === 200){
               _this.activities = resp.data.result.content
               _this.totalSize = resp.data.result.totalElements
+              _this.loading = false
+            }
+          })
+      },
+      canVoteListActivity(){
+        let _this = this
+        this.loading = true
+        this.$axios.get('/admin/activity/list/canVote?page='+_this.currentPage
+          +'&size='+_this.pageSize
+          +'&userName='+ _this.$store.state.user.userName)
+          .then(resp =>{
+            if(resp && resp.data.code === 200){
+              _this.canVoteActivities = resp.data.result.content
+              _this.canVotetotalSize = resp.data.result.totalElements
               _this.loading = false
             }
           })

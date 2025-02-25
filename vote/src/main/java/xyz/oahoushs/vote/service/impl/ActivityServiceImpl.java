@@ -72,6 +72,16 @@ public class ActivityServiceImpl extends BaseService implements IActivityService
         Page<Activity> all = activityDAO.findAllByAuthor(userName,pageable);
         return ResultFactory.buildSuccessResult(all);
     }
+    @Override
+    public Result listActivityCanVote(String userName,int page, int size) {
+        //分页查询
+        page = checkPage(page);
+        size = checkSize(size);
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<Activity> all = activityDAO.findAllCanVote(userName,pageable);
+        return ResultFactory.buildSuccessResult(all);
+    }
 
     @Override
     public Result listActivityByCase(int page, int size) {

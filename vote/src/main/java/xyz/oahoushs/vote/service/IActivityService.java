@@ -15,6 +15,7 @@ public interface IActivityService {
     Result updateActivity(String activityId,Activity activity);
 
     Result listActivityByUser(String userName, int page, int size);
+    Result listActivityCanVote(String userName, int page, int size);
 
     Result listActivityByCase(int page, int size);
 }

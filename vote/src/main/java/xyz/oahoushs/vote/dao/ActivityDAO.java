@@ -27,5 +27,6 @@ public interface ActivityDAO extends JpaRepository<Activity,String>, JpaSpecific
 
     Page<Activity> findAllByAuthor(String author ,Pageable pageable);
 
-
+    @Query(value = " select * from tb_activity a inner join tb_user_activity b on a.id=b.activity_id  where  a.state = '2' and `user_Name`=? ",nativeQuery = true)
+    Page<Activity> findAllCanVote(String userName, Pageable pageable);
 }

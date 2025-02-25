@@ -50,6 +50,12 @@ public class ActivityController {
                                      @RequestParam("size")int size){
         return activityService.listActivityByUser(userName,page,size);
     }
+    @GetMapping("/admin/activity/list/canVote")
+    public Result listActivityCanVote(@RequestParam("userName") String userName,
+                                     @RequestParam("page")int page,
+                                     @RequestParam("size")int size){
+        return activityService.listActivityCanVote(userName,page,size);
+    }
 
 
 
