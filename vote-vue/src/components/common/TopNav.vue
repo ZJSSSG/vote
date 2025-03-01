@@ -19,7 +19,8 @@
         <div class="grid-content bg-purple" style="float: left"  v-if="userName">
           <el-dropdown style="float: right" class="dropdown-link">
         <span class="el-dropdown-link" >
-       <img src="../../img/defaultImg.png" style="border-radius: 100%;width: 45px">
+                 <img :src="avatar || '../../img/defaultImg.png'"
+                      class="user-avatar">
         <span>{{userName}}</span>
         </span>
             <el-dropdown-menu slot="dropdown">
@@ -50,6 +51,7 @@
     name: "TopNav",
     data(){
       return{
+        avatar:this.$store.state.user.avatar,
         userName:this.$store.state.user.userName,
         activeIndex: 'listActivity',
         navList: [
@@ -59,6 +61,7 @@
         ],
       }
     },
+
     methods:{
       logout () {
         let _this = this

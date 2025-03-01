@@ -32,7 +32,8 @@
         <el-col :span="10">
           <el-form label-position="right" label-width="100px">
             <el-form-item>
-              <img :src="curUser.avatar" @click="updateAvatar" class="user-avatar">
+              <img :src="curUser.avatar || '../../img/defaultImg.png'" v-loading="avatarLoading"
+                   class="user-avatar">
             </el-form-item>
             <el-form-item label="用户名" >
               <label class="info-label">{{curUser.userName}}</label>
@@ -41,8 +42,23 @@
               <label class="info-label">{{curUser.email}}</label>
             </el-form-item>
             <el-form-item label="操作">
-              <el-button type="primary"  class="login-button" @click="updatePassword"> 修改密码 </el-button>
-              <el-button type="success"  class="login-button" @click="toUpdateEmail"> 修改邮箱 </el-button>
+              <el-button type="primary" class="login-button" @click="updatePassword"> 修改密码</el-button>
+              <el-button type="success" class="login-button" @click="toUpdateEmail"> 修改邮箱</el-button>
+              <span class="login-button">
+                      <el-button @click.native="setCurCandidate()"
+                                 type="primary"
+                      >
+                         更换头像
+                      </el-button>
+                    </span>
+              <el-upload
+                ref="upload"
+                action="http://localhost:8443/api/admin/candidate/covers"
+                with-credentials
+                :show-file-list="false"
+                :on-success="handleSuccess"
+              >
+              </el-upload>
             </el-form-item>
           </el-form>
         </el-col>
@@ -68,23 +84,26 @@
 <script>
     export default {
       name: "UserInfo",
-      data(){
-        return{
-          dialogForEmail:false,
-          dialogWidth:'500px',
-          email:'',
-          emailCode:'',
-          isUserNameOkay:'',
-          isCountDowning:false,
-          countDownText:'重新发送(60)',
-          user:{
-            userName:'',
-            password:''
+      data() {
+        return {
+          avatarLoading: true,
+          dialogForEmail: false,
+          dialogWidth: '500px',
+          email: '',
+          emailCode: '',
+          isUserNameOkay: '',
+          isCountDowning: false,
+          countDownText: '重新发送(60)',
+          user: {
+            userName: '',
+            password: ''
           },
-          verifyCode:'',
-          captchaPath:'',
-          captcha_key:'',
-          curUser:[],
+          verifyCode: '',
+          captchaPath: '',
+          captcha_key: '',
+          curUser: [],
+          curCandidate: {},
+          imageLink: null,
 
         }
       },
@@ -93,10 +112,12 @@
       },
       methods:{
         getCurUser(){
+          this.avatarLoading = true
           let _this = this
           this.$axios.get('/user?userName='+this.$store.state.user.userName).then(resp =>{
             if(resp){
               _this.curUser = resp.data
+              this.avatarLoading = false
             }
           })
         },
@@ -137,9 +158,6 @@
         clear(){
           this.dialogForEmail = false
         },
-        updateAvatar(){
-
-        },
         updatePassword(){
           this.$router.replace('/login/forget')
         },
@@ -149,32 +167,54 @@
             id:_this.curUser.id,
             userName: _this.curUser.userName
           }).then(resp =>{
-            if(resp && resp.data.code === 200){
+            if (resp && resp.data.code === 200) {
               this.$message.success("修改成功")
               this.dialogForEmail = false
               this.email = ''
               this.emailCode = ''
 
               this.getCurUser()
-            }else {
+            } else {
               let message = resp.data.message
               this.$message.error(message)
             }
           })
         },
-        toUpdateEmail(){
+        toUpdateEmail() {
           this.dialogForEmail = true
-        }
+        },
+        setCurCandidate() {
+          this.$refs.upload.$el.querySelector('input[type="file"]').click();
+        },
+        handleSuccess(response) {
+          this.imageLink = response
+          this.submitImgLink()
+          this.$message.warning('上传成功')
+        },
+        submitImgLink() {
+          this.$axios.put('/user/avatar', {
+            avatar: this.imageLink,
+            userName: this.$store.state.user.userName
+          }).then(resp => {
+            this.getCurUser()
+          })
+        },
       }
     }
 </script>
 
 <style scoped>
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  cursor: pointer;
+}
 
-  .login-center-box .el-input{
-    width: 40%;
-    float: left;
-  }
+.login-center-box .el-input {
+  width: 40%;
+  float: left;
+}
 
   .login-button{
     margin-left: 20px;

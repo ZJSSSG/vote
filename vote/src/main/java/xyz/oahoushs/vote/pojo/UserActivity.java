@@ -2,10 +2,7 @@ package xyz.oahoushs.vote.pojo;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * @ClassName: UserActivity
@@ -20,11 +17,12 @@ import javax.persistence.Table;
 public class UserActivity {
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     @Column(name = "activity_id")
     private String activityId;
 
     @Column(name = "user_name")
-    private Integer userName;
+    private String userName;
 
 }

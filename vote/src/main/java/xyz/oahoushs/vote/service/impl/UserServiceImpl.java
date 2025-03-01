@@ -16,14 +16,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.HtmlUtils;
+import xyz.oahoushs.vote.dao.UserActivityDAO;
 import xyz.oahoushs.vote.dao.UserDAO;
 import xyz.oahoushs.vote.pojo.AdminRole;
-import xyz.oahoushs.vote.pojo.AdminRoleMenu;
 import xyz.oahoushs.vote.pojo.AdminUserRole;
+import xyz.oahoushs.vote.pojo.UserActivity;
 import xyz.oahoushs.vote.result.Result;
 import xyz.oahoushs.vote.result.ResultFactory;
-import xyz.oahoushs.vote.service.AdminRoleMenuService;
 import xyz.oahoushs.vote.service.AdminRoleService;
 import xyz.oahoushs.vote.service.AdminUserRoleService;
 import xyz.oahoushs.vote.service.IUserService;
@@ -50,7 +49,8 @@ public class UserServiceImpl extends BaseService implements IUserService {
 
     @Autowired
     IdWorker idWorker;
-
+    @Autowired
+    UserActivityDAO userActivityDAO;
 
     @Autowired
     AdminRoleService adminRoleService;
@@ -58,9 +58,7 @@ public class UserServiceImpl extends BaseService implements IUserService {
     AdminUserRoleService adminUserRoleService;
 
 
-    public static final int[] captcha_font_types = {
-            Captcha.FONT_1,
-            Captcha.FONT_2,
+    public static final int[] captcha_font_types = {Captcha.FONT_1, Captcha.FONT_2,
             Captcha.FONT_3,
             Captcha.FONT_4,
             Captcha.FONT_5,
@@ -148,12 +146,27 @@ public class UserServiceImpl extends BaseService implements IUserService {
         size = checkSize(size);
         //根据注册日期降序
         Sort sort = Sort.by(Sort.Direction.DESC, "createTime");
-        Pageable pageable = PageRequest.of(page - 1, size,sort);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         Page<User> all = userDAO.listAllUser(pageable);
 
         List<AdminRole> roles;
-        for(User user : all){
+        for (User user : all) {
+            roles = adminRoleService.listRolesByUser(user.getUserName());
+            user.setRoles(roles);
+        }
+        return ResultFactory.buildSuccessResult(all);
+    }
+
+    @Override
+    public Result findAllCanVote(String activityId, String userName, int page, int size) {
+        page = checkPage(page);
+        size = checkSize(size);
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<User> all = userDAO.findAllCanVote(activityId, userName, pageable);
+        List<AdminRole> roles;
+        for (User user : all) {
             roles = adminRoleService.listRolesByUser(user.getUserName());
             user.setRoles(roles);
         }
@@ -470,7 +483,7 @@ public class UserServiceImpl extends BaseService implements IUserService {
     }
 
     @Override
-    public Result changeUserState(int userId,boolean state) {
+    public Result changeUserState(int userId, boolean state) {
         User userInDB = userDAO.findOneById(userId);
         userInDB.setState(state);
         try {
@@ -479,6 +492,36 @@ public class UserServiceImpl extends BaseService implements IUserService {
             return ResultFactory.buildFailResult("状态更新失败");
         }
         return ResultFactory.buildSuccessResult("状态更新成功");
+    }
+
+
+    @Override
+    public Result addVoter(String activityId, String userName) {
+        try {
+            UserActivity userActivity = new UserActivity();
+            userActivity.setActivityId(activityId);
+            userActivity.setUserName(userName);
+            userActivityDAO.save(userActivity);
+        } catch (Exception e) {
+            return ResultFactory.buildFailResult("添加失败");
+        }
+        return ResultFactory.buildSuccessResult("添加成功");
+
+    }
+
+    @Override
+    public Result updateAvatar(String avatar, String userName) {
+        try {
+            User oneByUserName = userDAO.findOneByUserName(userName);
+            oneByUserName.setAvatar(avatar);
+            userDAO.save(oneByUserName);
+        } catch (Exception e) {
+            return ResultFactory.buildFailResult("更换头像失败");
+
+        }
+
+        return ResultFactory.buildFailResult("更换头像成功");
+
     }
 
 

@@ -108,8 +108,9 @@
                   <el-button size="mini" type="primary"  @click="editActivity(scope.row)">编辑</el-button>
                   <el-button size="mini" type="primary"  @click="editCandidate(scope.row)">选手管理</el-button>
                   <el-button size="mini" type="success"  @click="toVoteResult(scope.row)">统计</el-button>
-                  <el-button size="mini"  type="warning" @click="showQrCode(scope.row)">分享</el-button>
-                  <el-button size="mini"  type="warning" @click="toVote(scope.row)">投票</el-button>
+<!--                  <el-button size="mini"  type="warning" @click="showQrCode(scope.row)">分享</el-button>-->
+                  <el-button size="mini"  type="warning" v-if="new Date().getTime() <= Date.parse(scope.row.endTime)" @click="toVote(scope.row)">投票</el-button>
+                  <el-button size="mini"  type="warning" @click="toAddVoter(scope.row)">添加投票人</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -127,6 +128,26 @@
       </el-col>
 
     </el-row>
+    <el-dialog title="添加投票者 " :visible.sync="dialogTableVisible" >
+      <el-table :data="userList" v-loading="userLoading">
+        <el-table-column property="userName" label="姓名" width="200"></el-table-column>
+        <el-table-column property="email" label="邮箱"></el-table-column>
+        <el-table-column  label="操作">
+          <template slot-scope="scope">
+          <el-button type="primary" @click="addVoter(scope.row)"> 添加</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div slot="footer" class="dialog-footer">
+        <el-pagination
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-size="pageSize"
+          :total="canVotetotalSize">
+        </el-pagination>
+      </div>
+    </el-dialog>
     <el-row>
       <el-col :sm="1"  :xl="2">&nbsp;</el-col>
       <el-col :sm="20"  :xs="24">
@@ -172,8 +193,8 @@
                 width="500px">
                 <template slot-scope="scope">
                   <el-button size="mini" type="success"  @click="toVoteResult(scope.row)">统计</el-button>
-                  <el-button size="mini"  type="warning" @click="showQrCode(scope.row)">分享</el-button>
-                  <el-button size="mini"  type="warning" @click="toVote(scope.row)">投票</el-button>
+<!--                  <el-button size="mini"  type="warning" @click="showQrCode(scope.row)">分享</el-button>-->
+                  <el-button size="mini"  type="warning" v-if="new Date().getTime() <= Date.parse(scope.row.endTime)" @click="toVote(scope.row)">投票</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -197,14 +218,19 @@
 
 <script>
   import QRCode from 'qrcodejs2';
+  import userInfo from "../account/UserInfo";
   export default {
     name: 'ListActivity',
     data(){
       return{
+        userList:[],
         noticeLoading:false,
         loading: false,
+        dialogTableVisible:false,
         dialogWidth:'500px',
         currentPage:1,
+        userTotalSize:0,
+        userLoading:false,
         pageSize:6,
         totalSize:0,
         canVotetotalSize:0,
@@ -235,6 +261,8 @@
 
     },
     methods:{
+
+
       listActivity(){
         let _this = this
         this.loading = true
@@ -263,6 +291,29 @@
             }
           })
       },
+      addVoter(user){
+        let _this = this;
+        _this.userLoading = true;
+        this.$axios.get('/admin/user/addVoter?activityId='+_this.activityId+'&userName='+user.userName).then(resp => {
+          if (resp && resp.data.code === 200) {
+            this.$message.success('添加成功')
+            _this.userLoading = false
+            this.listUsers()
+          }
+        })
+      },
+      listUsers () {
+        let _this = this;
+        _this.userLoading = true;
+        this.$axios.get('/admin/user/findAllCanVote?activityId='+_this.activityId+'&userName='+_this.$store.state.user.userName+'&page='+_this.currentPage+'&size='+_this.pageSize).then(resp => {
+          if (resp && resp.data.code === 200) {
+            _this.userList = resp.data.result.content
+            console.log(this.userList)
+            _this.userTotalSize = resp.data.result.totalElements
+            _this.userLoading = false
+          }
+        })
+      },
       toCreate(){
         this.$store.state.curCreateActivity = []
         this.$router.replace('/admin/vote/add/index')
@@ -287,6 +338,11 @@
       toVote(activity){
         this.$store.commit('createActive', activity);
         window.open(`/ActivityIndex/${activity.id}`, '_blank'); // 打开新页面
+      },
+      toAddVoter(activity){
+        this.activityId=activity.id
+        this.listUsers(activity);
+        this.dialogTableVisible=true
       },
       showQrCode(activity){
         this.dialogFormVisible = true

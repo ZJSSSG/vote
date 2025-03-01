@@ -5,7 +5,8 @@
       <div class="header-right"   v-if="userName">
         <el-dropdown style="float: right" class="dropdown-link">
         <span class="el-dropdown-link" >
-       <img src="../../img/defaultImg.png" style="border-radius: 100%;width: 45px">
+                        <img :src="avatar || '../../img/defaultImg.png'"
+                             class="user-avatar">
         <span>{{userName}}</span>
         </span>
           <el-dropdown-menu slot="dropdown">
@@ -27,8 +28,13 @@
       name: "TopHeader",
       data(){
         return{
+          avatar:this.$store.state.user.avatar,
+
           userName:this.$store.state.user.userName,
         }
+      },
+      mounted() {
+        console.log("是"+this.avatar)
       },
       methods:{
         logout () {
@@ -61,5 +67,12 @@
   .header-right{
     float: right;
     margin-right: 150px;
+  }
+  .user-avatar{
+    float: left;
+    margin-left: 30px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
   }
 </style>

@@ -8,6 +8,7 @@ export default new Vuex.Store({
     user: {
       userName: window.localStorage.getItem('user' || '[]') == null ? '' : JSON.parse(window.localStorage.getItem('user' || '[]')).userName,
       password: window.localStorage.getItem('user' || '[]') == null ? '' : JSON.parse(window.localStorage.getItem('user' || '[]')).password,
+      avatar: window.localStorage.getItem('user' || '[]') == null ? '' : JSON.parse(window.localStorage.getItem('user' || '[]')).avatar,
     },
     curCreateActivity:{
     },
@@ -17,6 +18,7 @@ export default new Vuex.Store({
   mutations: {
     login (state, user) {
       state.user = user
+      console.log(JSON.stringify(user))
       window.localStorage.setItem('user', JSON.stringify(user))
     },
     logout(state){

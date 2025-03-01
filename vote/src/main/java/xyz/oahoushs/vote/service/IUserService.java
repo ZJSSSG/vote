@@ -16,6 +16,9 @@ public interface IUserService {
 
     Result listUsers(HttpServletRequest request, HttpServletResponse response, int page, int size);
 
+
+    Result findAllCanVote(String activityId,String userName, int page, int size);
+
     Result checkEmail(String email);
 
     Result register(User user, String emailCode, String captchaCode, String captchaKey,HttpServletRequest request);
@@ -39,4 +42,8 @@ public interface IUserService {
     Result checkEmailCode(String email, String emailCode);
 
     Result changeUserState(int userId,boolean state);
+
+    Result addVoter(String activityId, String userName);
+
+    Result updateAvatar(String avatar, String userName);
 }

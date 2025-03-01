@@ -34,12 +34,13 @@
     data(){
       return{
         user:{
-          userName:'youluoyuan.com',
-          password:'123456'
+          userName:'',
+          password:''
         },
         verifyCode:'',
         captchaPath:'',
-        captcha_key:''
+        captcha_key:'',
+        curUser:{},
       }
     },
 
@@ -66,14 +67,24 @@
           if(resp.data.code === 200){
             this.$message.success("登录成功");
             _this.$store.commit('login', _this.user)
-            var path = this.$route.query.redirect
-            this.$router.push({path: path === '/' || path === undefined ? '/admin' : path})
+            this.getCurUser()
           }else {
             _this.updateVerifyCode();
             this.$message.error(resp.data.message);
           }
         })
 
+      },
+      getCurUser(){
+        let _this = this
+        this.$axios.get('/user?userName='+this.$store.state.user.userName).then(resp =>{
+          if(resp){
+            _this.curUser = resp.data
+            _this.$store.commit('login', _this.curUser)
+            var path = this.$route.query.redirect
+            this.$router.push({path: path === '/' || path === undefined ? '/admin' : path})
+          }
+        })
       },
       updateVerifyCode(){
         this.captchaPath = 'http://localhost:8443/api/user/captcha?captcha_key='+this.captcha_key + '&random'+Date.parse(new Date());

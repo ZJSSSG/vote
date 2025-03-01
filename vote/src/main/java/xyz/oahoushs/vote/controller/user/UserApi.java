@@ -25,25 +25,40 @@ public class UserApi {
     IUserService userService;
 
 
-
     @GetMapping("/admin/user/list")
     public Result listUsers(
             HttpServletRequest request,
             HttpServletResponse response,
-            @RequestParam("page")int page,
-            @RequestParam("size")int size){
-        return userService.listUsers(request,response,page,size);
+            @RequestParam("page") int page,
+            @RequestParam("size") int size) {
+        return userService.listUsers(request, response, page, size);
+    }
+
+    @GetMapping("/admin/user/findAllCanVote")
+    public Result findAllCanVote(
+            @RequestParam("activityId") String activityId,
+            @RequestParam("userName") String userName,
+            @RequestParam("page") int page,
+            @RequestParam("size") int size) {
+        return userService.findAllCanVote(activityId, userName, page, size);
+    }
+
+    @GetMapping("/admin/user/addVoter")
+    public Result addVoter(
+            @RequestParam("activityId") String activityId,
+            @RequestParam("userName") String userName) {
+        return userService.addVoter(activityId, userName);
     }
 
     @GetMapping("/user")
-    public User getUserByName(@RequestParam("userName")String userName){
+    public User getUserByName(@RequestParam("userName") String userName) {
         return userService.getByUserName(userName);
     }
 
 
     @PutMapping("/admin/user/state/{userId}")
-    public Result changeUserState(@PathVariable("userId") int userId,@RequestParam("state") boolean state){
-        return userService.changeUserState(userId,state);
+    public Result changeUserState(@PathVariable("userId") int userId, @RequestParam("state") boolean state) {
+        return userService.changeUserState(userId, state);
     }
 
 
@@ -151,14 +166,26 @@ public class UserApi {
 
     /**
      * 修改邮箱
+     *
      * @param user
      * @return
      */
     @PutMapping("/user/email")
     public Result updateEmail(@RequestParam("email") String email,
                               @RequestParam("verify_code") String verifyCode,
-                              @RequestBody User user){
-        return userService.updateEmail(email,verifyCode,user);
+                              @RequestBody User user) {
+        return userService.updateEmail(email, verifyCode, user);
+    }
+
+    /**
+     * 修改头像
+     *
+     * @param user
+     * @return
+     */
+    @PutMapping("/user/avatar")
+    public Result updateAvatar(@RequestBody User user) {
+        return userService.updateAvatar(user.getAvatar(), user.getUserName());
     }
 
     /**
