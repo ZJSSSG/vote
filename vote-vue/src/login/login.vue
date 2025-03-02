@@ -82,8 +82,8 @@
             _this.curUser = resp.data
             _this.$store.commit('login', _this.curUser)
             var path = this.$route.query.redirect
-            this.$router.push({path: path === '/' || path === undefined ? '/admin' : path})
-          }
+            const targetPath = path === '/' || path === undefined ? '/admin' : path;
+            window.location.href = window.location.origin + targetPath;          }
         })
       },
       updateVerifyCode(){

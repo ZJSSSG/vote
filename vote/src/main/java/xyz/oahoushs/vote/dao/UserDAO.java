@@ -43,7 +43,7 @@ public interface UserDAO extends JpaRepository<User,String>, JpaSpecificationExe
     Page<User> listAllUser(Pageable pageable);
 
 
-    @Query(value = " select * from tb_user a left join tb_user_activity b on a.user_name=b.user_name  where  a.state = '1' and (`activity_id`!= ? or `activity_id` is null) and a.user_name!=? ",nativeQuery = true)
+    @Query(value = " select * from tb_user a left join tb_user_activity b on a.user_name=b.user_name and `activity_id`= ?  where  b.`id` is null",nativeQuery = true)
     Page<User> findAllCanVote(String activityId,String userName, Pageable pageable);
 
 }

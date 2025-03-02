@@ -28,7 +28,7 @@ public class Activity {
     @Column(name = "sign_in")
     private String signIn;
     @Column(name = "verify_code")
-    private boolean verifyCode;
+    private Boolean verifyCode;
     @Column(name = "start_time")
     private Date startTime;
     @Column(name = "end_time")

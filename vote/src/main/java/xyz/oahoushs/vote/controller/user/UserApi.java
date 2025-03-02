@@ -34,7 +34,7 @@ public class UserApi {
         return userService.listUsers(request, response, page, size);
     }
 
-    @GetMapping("/admin/user/findAllCanVote")
+    @GetMapping("/user/findAllCanVote")
     public Result findAllCanVote(
             @RequestParam("activityId") String activityId,
             @RequestParam("userName") String userName,
@@ -43,7 +43,7 @@ public class UserApi {
         return userService.findAllCanVote(activityId, userName, page, size);
     }
 
-    @GetMapping("/admin/user/addVoter")
+    @GetMapping("/user/addVoter")
     public Result addVoter(
             @RequestParam("activityId") String activityId,
             @RequestParam("userName") String userName) {

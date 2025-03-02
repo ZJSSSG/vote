@@ -67,7 +67,7 @@
                 <template slot-scope="scope">
                   <el-button type="primary"  size="small" v-if="scope.row.state === '1'">正常</el-button>
                   <el-button type="danger"  size="small" v-else-if="scope.row.state === '0'">禁止</el-button>
-                  <el-button type="info" size="small" v-else>案例</el-button>
+                  <el-button type="info" size="small" v-else>需审批</el-button>
                 </template>
               </el-table-column>
               <el-table-column
@@ -90,7 +90,7 @@
                          禁 止
                       </el-dropdown-item>
                       <el-dropdown-item @click.native="updateState(scope.row,'2')">
-                         案 例
+                         需审批
                       </el-dropdown-item>
                     </el-dropdown-menu>
                   </el-dropdown>

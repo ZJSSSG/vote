@@ -1,6 +1,9 @@
 package xyz.oahoushs.vote.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,9 +11,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import xyz.oahoushs.vote.dao.ActivityDAO;
+import xyz.oahoushs.vote.dao.AdminRoleDAO;
 import xyz.oahoushs.vote.pojo.Activity;
+import xyz.oahoushs.vote.pojo.AdminRole;
 import xyz.oahoushs.vote.result.Result;
 import xyz.oahoushs.vote.result.ResultFactory;
+import xyz.oahoushs.vote.service.AdminRoleService;
 import xyz.oahoushs.vote.service.IActivityService;
 import xyz.oahoushs.vote.utils.IdWorker;
 import xyz.oahoushs.vote.utils.TextUtils;
@@ -30,6 +36,8 @@ public class ActivityServiceImpl extends BaseService implements IActivityService
 
     @Autowired
     ActivityDAO activityDAO;
+    @Autowired
+    AdminRoleService adminRoleService;
 
     @Override
     public Result deleteActivity(String activityId) {
@@ -66,8 +74,7 @@ public class ActivityServiceImpl extends BaseService implements IActivityService
         page = checkPage(page);
         size = checkSize(size);
         //根据创建日期降序
-        Sort sort = Sort.by(Sort.Direction.DESC, "createTime");
-        Pageable pageable = PageRequest.of(page - 1, size,sort);
+        Pageable pageable = PageRequest.of(page - 1, size);
 
         Page<Activity> all = activityDAO.findAllByAuthor(userName,pageable);
         return ResultFactory.buildSuccessResult(all);
@@ -128,6 +135,14 @@ public class ActivityServiceImpl extends BaseService implements IActivityService
         activity.setState("1");
         activity.setCreateTime(new Date());
         activity.setUpdateTime(new Date());
+        Subject subject = SecurityUtils.getSubject();
+        String username = subject.getPrincipal().toString();
+        List<AdminRole> adminRoles = adminRoleService.listRolesByUser(username);
+        for(AdminRole adminRole:adminRoles){
+            if(adminRole.getId()==3){
+                activity.setState("2");
+            }
+        }
         //保存到数据库
         activityDAO.save(activity);
         return ResultFactory.buildSuccessResult(activity);
@@ -142,15 +157,30 @@ public class ActivityServiceImpl extends BaseService implements IActivityService
             return ResultFactory.buildFailResult(checkInfo);
         }
         log.info("update activity === >"+activity.toString());
-        //补全数据
-        activityFromDb.setTitle(activity.getTitle());
-        activityFromDb.setContent(activity.getContent());
-        activityFromDb.setType(activity.getType());
-        activityFromDb.setSignIn(activity.getSignIn());
-        activityFromDb.setVerifyCode(activity.isVerifyCode());
-        activityFromDb.setState(activity.getState());
-        activityFromDb.setStartTime(activity.getStartTime());
-        activityFromDb.setEndTime(activity.getEndTime());
+        if (activity.getTitle() != null) {
+            activityFromDb.setTitle(activity.getTitle());
+        }
+        if (activity.getContent() != null) {
+            activityFromDb.setContent(activity.getContent());
+        }
+        if (activity.getType() != null) {
+            activityFromDb.setType(activity.getType());
+        }
+        if (activity.getSignIn() != null) {
+            activityFromDb.setSignIn(activity.getSignIn());
+        }
+        if (activity.getVerifyCode() != null) { // 注意：如果是基本数据类型 boolean，这里需要调整为包装类 Boolean
+            activityFromDb.setVerifyCode(activity.getVerifyCode());
+        }
+        if (activity.getState() != null) {
+            activityFromDb.setState(activity.getState());
+        }
+        if (activity.getStartTime() != null) {
+            activityFromDb.setStartTime(activity.getStartTime());
+        }
+        if (activity.getEndTime() != null) {
+            activityFromDb.setEndTime(activity.getEndTime());
+        }
         activityFromDb.setUpdateTime(new Date());
         //保存到数据库
         activityDAO.save(activityFromDb);

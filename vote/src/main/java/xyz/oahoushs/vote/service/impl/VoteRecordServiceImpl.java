@@ -71,7 +71,7 @@ public class VoteRecordServiceImpl implements IVoteRecordService {
         int oneVotes = Integer.parseInt(typeMap.get("oneVotes").toString());
 
         //3.如果需要验证码，判断验证码是否正确
-        if(activity.isVerifyCode()){
+        if(activity.getVerifyCode()){
             String captchaVerifyCode = (String) redisUtils.get(Constants.User.KEY_CAPTCHA_CONTENT + captchaKey);
             log.info("captchaVerifyCode === > " + captchaVerifyCode);
             if (TextUtils.isEmpty(captchaVerifyCode)) {
@@ -144,7 +144,7 @@ public class VoteRecordServiceImpl implements IVoteRecordService {
         List<String> selectedIds = JSONObject.parseArray(array.toJSONString(), String.class);
 
         //1.如果需要验证码，判断验证码是否正确
-        if(activity.isVerifyCode()){
+        if(activity.getVerifyCode()){
             String captchaVerifyCode = (String) redisUtils.get(Constants.User.KEY_CAPTCHA_CONTENT + captchaKey);
             log.info("captchaVerifyCode === > " + captchaVerifyCode);
             if (TextUtils.isEmpty(captchaVerifyCode)) {

@@ -91,19 +91,19 @@ public class UserServiceImpl extends BaseService implements IUserService {
         response.setHeader("Pragma", "No-cache");
         response.setHeader("Cache-Control", "no-cache");
         response.setDateHeader("Expires", 0);
-        int captchaType = random.nextInt(3);
+//        int captchaType = random.nextInt(3);
         Captcha targetCaptcha = null;
-        if(captchaType  == 0){
-            // 三个参数分别为宽、高、位数
-            targetCaptcha = new SpecCaptcha(210,60,5);
-        }else if(captchaType == 1){
-            //gif类型
-            targetCaptcha = new GifCaptcha(210,60,5);
-        }else {
+//        if(captchaType  == 0){
+//            // 三个参数分别为宽、高、位数
+//            targetCaptcha = new SpecCaptcha(210,60,5);
+//        }else if(captchaType == 1){
+//            //gif类型
+//            targetCaptcha = new GifCaptcha(210,60,5);
+//        }else {
             //算数类型
             targetCaptcha= new ArithmeticCaptcha(210,60);
             targetCaptcha.setLen(2);//几位数运算、默认两位
-        }
+//        }
 
 
         int index = random.nextInt(captcha_font_types.length);

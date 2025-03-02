@@ -24,9 +24,9 @@ public interface ActivityDAO extends JpaRepository<Activity,String>, JpaSpecific
     //分页列出案例
     @Query(value = " select * from tb_activity a where  a.state = '2'",nativeQuery = true)
     List<Activity> findByState(Pageable pageable);
-
+    @Query(value = " select * from tb_activity a where  a.author = ? and a.state != '0'",nativeQuery = true)
     Page<Activity> findAllByAuthor(String author ,Pageable pageable);
 
-    @Query(value = " select * from tb_activity a inner join tb_user_activity b on a.id=b.activity_id  where  a.state = '2' and `user_Name`=? ",nativeQuery = true)
+    @Query(value = " select * from tb_activity a inner join tb_user_activity b on a.id=b.activity_id  where  a.state = '1' and `user_Name`=? ",nativeQuery = true)
     Page<Activity> findAllCanVote(String userName, Pageable pageable);
 }

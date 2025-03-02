@@ -87,7 +87,8 @@
                 label="状态"
                 fit>
                 <template slot-scope="scope">
-                  <el-tag type="info"  size="small" v-if="date.getTime() < Date.parse(scope.row.startTime)">未开始</el-tag>
+                  <el-tag type="info"  size="small" v-if="Number(scope.row.state)==2">审批中</el-tag>
+                  <el-tag type="info"  size="small" v-else-if="date.getTime() < Date.parse(scope.row.startTime)">未开始</el-tag>
                   <el-tag type="danger"  size="small" v-else-if="new Date().getTime() > Date.parse(scope.row.endTime)">已结束</el-tag>
                   <el-tag type="success" size="small" v-else>进行中</el-tag>
                 </template>
@@ -109,7 +110,7 @@
                   <el-button size="mini" type="primary"  @click="editCandidate(scope.row)">选手管理</el-button>
                   <el-button size="mini" type="success"  @click="toVoteResult(scope.row)">统计</el-button>
 <!--                  <el-button size="mini"  type="warning" @click="showQrCode(scope.row)">分享</el-button>-->
-                  <el-button size="mini"  type="warning" v-if="new Date().getTime() <= Date.parse(scope.row.endTime)" @click="toVote(scope.row)">投票</el-button>
+<!--                  <el-button size="mini"  type="warning" v-if="new Date().getTime() <= Date.parse(scope.row.endTime)" @click="toVote(scope.row)">投票</el-button>-->
                   <el-button size="mini"  type="warning" @click="toAddVoter(scope.row)">添加投票人</el-button>
                 </template>
               </el-table-column>
@@ -294,18 +295,19 @@
       addVoter(user){
         let _this = this;
         _this.userLoading = true;
-        this.$axios.get('/admin/user/addVoter?activityId='+_this.activityId+'&userName='+user.userName).then(resp => {
+        this.$axios.get('/user/addVoter?activityId='+_this.activityId+'&userName='+user.userName).then(resp => {
           if (resp && resp.data.code === 200) {
             this.$message.success('添加成功')
             _this.userLoading = false
             this.listUsers()
+            this.canVoteListActivity()
           }
         })
       },
       listUsers () {
         let _this = this;
         _this.userLoading = true;
-        this.$axios.get('/admin/user/findAllCanVote?activityId='+_this.activityId+'&userName='+_this.$store.state.user.userName+'&page='+_this.currentPage+'&size='+_this.pageSize).then(resp => {
+        this.$axios.get('/user/findAllCanVote?activityId='+_this.activityId+'&userName='+_this.$store.state.user.userName+'&page='+_this.currentPage+'&size='+_this.pageSize).then(resp => {
           if (resp && resp.data.code === 200) {
             _this.userList = resp.data.result.content
             console.log(this.userList)
